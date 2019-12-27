@@ -181,6 +181,114 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-抽奖功能实现记录" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/27/%E6%8A%BD%E5%A5%96%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0%E8%AE%B0%E5%BD%95/">抽奖功能实现记录</a>
+    </h1>
+  
+
+        
+        <a href="/2019/12/27/%E6%8A%BD%E5%A5%96%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0%E8%AE%B0%E5%BD%95/" class="archive-article-date">
+  	<time datetime="2019-12-27T15:52:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-12-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <img src="https://github.com/HiJackLi/image_storage/raw/master/%E6%8A%BD%E5%A5%96%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0%E8%AE%B0%E5%BD%95/%E6%8A%BD%E5%A5%96%E5%8A%9F%E8%83%BD.png" width = "40%" height = "40%" text-align=center />
+
+<blockquote>
+<p>在此记录一些小的功能demo实现过程的记录。这些demo都是根据网上收集或者自己突发奇想实现的功能。<br>前天实现了一个简单的抽奖功能，今天来复个盘。<br>这个功能很简单，就是点击之后，轮盘旋转，旋转停止弹出抽奖结果。我从两个角度重新写了一遍，一个是面向过程的方法，一步一步实现，这种偏向正常人的思维。再一个实现方法是面向对象的方法，这个对我来说也是比较新鲜的，以前虽然听过，但很少实操过。</p>
+</blockquote>
+<h5 id="第一个面向过程编程的方式中，对于我来说重点有以下几个："><a href="#第一个面向过程编程的方式中，对于我来说重点有以下几个：" class="headerlink" title="第一个面向过程编程的方式中，对于我来说重点有以下几个："></a>第一个面向过程编程的方式中，对于我来说重点有以下几个：</h5><ol>
+<li>点击让轮盘随机旋转，旋转几圈，角度怎么随机？  </li>
+<li>旋转通过什么实现？  </li>
+<li>如何判断轮盘停止之后获得什么奖项？  </li>
+</ol>
+<ul>
+<li>实现过程：  <ol>
+<li>第一个问题通过Math.random()来实现;  </li>
+<li>第二个问题通过css3的旋转属性实现；  </li>
+<li>第三个问题通过if else判断旋转角度即可，再通过函数封装一下就好了；  </li>
+</ol>
+</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> deg = <span class="built_in">Math</span>.random() * <span class="number">360</span>;</span><br><span class="line">ele.style.transform = <span class="string">`rotate(<span class="subst">$&#123;deg&#125;</span>deg)`</span>;</span><br><span class="line">ele.style.transition = <span class="string">`all 4s`</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>难点：</p>
+<ol>
+<li>点击多次就有问题，自己知道要等旋转结束才能再点击</li>
+<li>什么时候判断旋转结束</li>
+<li>如果别人点击多次如何避免出现问题</li>
+</ol>
+</li>
+<li><p>解决：</p>
+<ol>
+<li>通过一个监听事件WebkitTransitionEnd监听轮盘旋转结束，这个都忘记好久了。</li>
+<li>通过给程序加锁，可以避免多次点击多次产生执行事件，导致错误。也就是在锁开的点击就生效，点击事件执行，然后锁立马关上，等到监听事件监听到轮盘旋转结束，再打开锁。</li>
+</ol>
+</li>
+<li><p>最后还有一个问题，就是第二次点击，轮盘不会旋转设置好的8圈，而是转一圈以内的角度。这个问题在于，第一次旋转结束的状态角度跟第二次随机生成的状态角度相差不过360度，比如：第一次随机旋转8圈+45度 停止，第二次随机了一个8圈+90度，那么两次的度数相差45度，对于旋转属性来说，第二次变换只想对于上一次的状态变化，所以并不会旋转8圈，而是转45度。<br>所以在每次旋转结束，都要隐式的把轮盘的状态归零。</p>
+</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ele.style.transform = <span class="string">`rotate(<span class="subst">$&#123;deg&#125;</span>deg)`</span>;</span><br><span class="line">ele.style.transition = <span class="string">`none`</span>;</span><br></pre></td></tr></table></figure>
+
+<h5 id="用面向对象的方法实现有几点要记录的："><a href="#用面向对象的方法实现有几点要记录的：" class="headerlink" title="用面向对象的方法实现有几点要记录的："></a>用面向对象的方法实现有几点要记录的：</h5><ul>
+<li>整体思路：<blockquote>
+<p>轮盘对象<br>按钮对象<br>轮盘有监听旋转停止功能<br>轮盘有旋转的功能<br>轮盘有奖项属性，并且有判断奖项的功能<br>轮盘有初始角度<br>轮盘有旋转结束的时间点<br>按钮有被点击的功能<br>按钮点击有生成旋转角度的功能<br>按钮有控制轮盘是否符合旋转要求的能力(判断轮盘是否旋转结束)    </p>
+</blockquote>
+</li>
+</ul>
+<p>在实现过程中，除了有些地方需要记录this，写法上跟面向过程有些不一样，其他的功能都跟面向过程实现方法一致。只是要多熟悉一下这种感觉，不过确实挺好。<br>最后通过一个立即执行函数封闭一下作用域，不让外界影响程序。并立即执行函数中传递了window，绑定了一个对象，把它暴露出去，这个对象是外界定制轮盘旋转多少圈的，如果需要也可以定制一些其他功能需求。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/12/27/%E6%8A%BD%E5%A5%96%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0%E8%AE%B0%E5%BD%95/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-博客网站正式上线了" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
